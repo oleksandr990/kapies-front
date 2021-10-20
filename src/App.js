@@ -31,7 +31,9 @@ const COMPLETE_TODO = gql`
 
 function App() {
   let input;
-  const { data, loading, error } = useQuery(READ_TODOS);
+  const { data, loading, error } = useQuery(READ_TODOS, {
+    fetchPolicy: "network-only",
+  });
   const [createTodo] = useMutation(CREATE_TODO);
   const [completeTodo] = useMutation(COMPLETE_TODO);
 
@@ -41,18 +43,22 @@ function App() {
 
   const handleCreate = (e) => {
     e.preventDefault();
-    createTodo({ variables: { title: input.value, done: false } });
+    createTodo({
+      variables: { title: input.value, done: false },
+      refetchQueries: [{ query: READ_TODOS }],
+    });
     input.value = "";
-    window.location.reload();
   };
 
   const handleDone = (todo) => {
     if (todo.done) {
       return;
     }
-    completeTodo({ variables: { id: todo.id } });
-    window.location.reload();
-  }
+    completeTodo({
+      variables: { id: todo.id },
+      refetchQueries: [{ query: READ_TODOS }],
+    });
+  };
 
   return (
     <div className="app">
